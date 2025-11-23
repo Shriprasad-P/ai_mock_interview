@@ -7,7 +7,7 @@
   
   <div>
     <img src="https://img.shields.io/badge/-Next.JS-black?style=for-the-badge&logoColor=white&logo=nextdotjs&color=black" alt="next.js" />
-    <img src="https://img.shields.io/badge/-Vapi-white?style=for-the-badge&color=5dfeca" alt="vapi" />
+    <img src="https://img.shields.io/badge/-ElevenLabs-white?style=for-the-badge&color=5dfeca" alt="elevenlabs" />
     <img src="https://img.shields.io/badge/-Tailwind_CSS-black?style=for-the-badge&logoColor=white&logo=tailwindcss&color=06B6D4" alt="tailwindcss" />
     <img src="https://img.shields.io/badge/-Firebase-black?style=for-the-badge&logoColor=white&logo=firebase&color=DD2C00" alt="firebase" />
   </div>
@@ -50,7 +50,7 @@ If you're getting started and need assistance or face any bugs, join our active 
 - Next.js
 - Firebase
 - Tailwind CSS
-- Vapi AI
+- ElevenLabs AI
 - shadcn/ui
 - Google Gemini
 - Zod
@@ -59,7 +59,7 @@ If you're getting started and need assistance or face any bugs, join our active 
 
 👉 **Authentication**: Sign Up and Sign In using password/email authentication handled by Firebase.
 
-👉 **Create Interviews**: Easily generate MBA job interviews (Finance, Operations, Consulting, etc.) with help of Vapi voice assistants and Google Gemini.
+👉 **Create Interviews**: Easily generate MBA job interviews (Finance, Operations, Consulting, etc.) with help of ElevenLabs voice agents and Google Gemini.
 
 👉 **Get feedback from AI**: Take the interview with AI voice agent, and receive instant feedback on Business Acumen, Analytical Thinking, and Communication.
 
@@ -105,8 +105,8 @@ npm install
 Create a new file named `.env.local` in the root of your project and add the following content:
 
 ```env
-NEXT_PUBLIC_VAPI_WEB_TOKEN=
-NEXT_PUBLIC_VAPI_WORKFLOW_ID=
+# NEXT_PUBLIC_VAPI_WEB_TOKEN= (removed - using ElevenLabs)
+# NEXT_PUBLIC_VAPI_WORKFLOW_ID= (removed - using ElevenLabs)
 
 GOOGLE_GENERATIVE_AI_API_KEY=
 
