@@ -1,12 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useConversation } from "@elevenlabs/react";
 
 import { cn } from "@/lib/utils";
-import { vapi } from "@/lib/vapi.sdk";
-import { interviewer } from "@/constants";
 import { createFeedback } from "@/lib/actions/general.action";
 
 enum CallStatus {
@@ -32,63 +31,62 @@ const Agent = ({
   const router = useRouter();
   const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
   const [messages, setMessages] = useState<SavedMessage[]>([]);
-  const [isSpeaking, setIsSpeaking] = useState(false);
   const [lastMessage, setLastMessage] = useState<string>("");
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [micStream, setMicStream] = useState<MediaStream | null>(null);
 
-  useEffect(() => {
-    const onCallStart = () => {
+  const conversation = useConversation({
+    onConnect: () => {
+      console.log("✅ Connected to ElevenLabs");
+      setIsConnecting(false);
       setCallStatus(CallStatus.ACTIVE);
-    };
-
-    const onCallEnd = () => {
+    },
+    onDisconnect: () => {
+      console.log("❌ Disconnected from ElevenLabs");
+      setIsConnecting(false);
       setCallStatus(CallStatus.FINISHED);
-    };
-
-    const onMessage = (message: Message) => {
-      if (message.type === "transcript" && message.transcriptType === "final") {
-        const newMessage = { role: message.role, content: message.transcript };
-        setMessages((prev) => [...prev, newMessage]);
+      // Clean up microphone stream
+      if (micStream) {
+        micStream.getTracks().forEach(track => track.stop());
+        setMicStream(null);
       }
-    };
+    },
+    onMessage: (message) => {
+      console.log("📨 Message received:", message);
+      const role = message.source === "user" ? "user" : "assistant";
+      const newMessage: SavedMessage = { role, content: message.message };
+      setMessages((prev) => [...prev, newMessage]);
+      if (role === "assistant") {
+        setLastMessage(message.message);
+      }
+    },
+    onError: (error) => {
+      console.error("❌ ElevenLabs Error:", error);
+      setIsConnecting(false);
+      setCallStatus(CallStatus.INACTIVE);
+      // Clean up on error
+      if (micStream) {
+        micStream.getTracks().forEach(track => track.stop());
+        setMicStream(null);
+      }
+    },
+  });
 
-    const onSpeechStart = () => {
-      console.log("speech start");
-      setIsSpeaking(true);
-    };
-
-    const onSpeechEnd = () => {
-      console.log("speech end");
-      setIsSpeaking(false);
-    };
-
-    const onError = (error: Error) => {
-      console.log("Error:", error);
-    };
-
-    vapi.on("call-start", onCallStart);
-    vapi.on("call-end", onCallEnd);
-    vapi.on("message", onMessage);
-    vapi.on("speech-start", onSpeechStart);
-    vapi.on("speech-end", onSpeechEnd);
-    vapi.on("error", onError);
-
-    return () => {
-      vapi.off("call-start", onCallStart);
-      vapi.off("call-end", onCallEnd);
-      vapi.off("message", onMessage);
-      vapi.off("speech-start", onSpeechStart);
-      vapi.off("speech-end", onSpeechEnd);
-      vapi.off("error", onError);
-    };
-  }, []);
+  const { status, isSpeaking, startSession, endSession } = conversation;
 
   useEffect(() => {
-    if (messages.length > 0) {
-      setLastMessage(messages[messages.length - 1].content);
+    // Sync internal callStatus with hook status if needed, 
+    // but we are managing callStatus manually for FINISHED state logic
+    if (status === "connected") {
+      setCallStatus(CallStatus.ACTIVE);
+    } else if (status === "connecting") {
+      setCallStatus(CallStatus.CONNECTING);
     }
+  }, [status]);
 
+  useEffect(() => {
     const handleGenerateFeedback = async (messages: SavedMessage[]) => {
-      console.log("handleGenerateFeedback");
+      console.log("📊 Generating feedback...");
 
       const { success, feedbackId: id } = await createFeedback({
         interviewId: interviewId!,
@@ -100,12 +98,14 @@ const Agent = ({
       if (success && id) {
         router.push(`/interview/${interviewId}/feedback`);
       } else {
-        console.log("Error saving feedback");
+        console.log("❌ Error saving feedback");
         router.push("/");
       }
     };
 
-    if (callStatus === CallStatus.FINISHED) {
+    // Only redirect if the call actually finished (not if it failed to connect)
+    // Check that we have messages, which means the call was actually active
+    if (callStatus === CallStatus.FINISHED && messages.length > 0) {
       if (type === "generate") {
         router.push("/");
       } else {
@@ -115,34 +115,75 @@ const Agent = ({
   }, [messages, callStatus, feedbackId, interviewId, router, type, userId]);
 
   const handleCall = async () => {
+    console.log("🎤 Starting call...");
     setCallStatus(CallStatus.CONNECTING);
+    setIsConnecting(true);
 
-    if (type === "generate") {
-      await vapi.start(process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, {
-        variableValues: {
-          username: userName,
-          userid: userId,
-        },
+    try {
+      // Request microphone permission first
+      console.log("🎤 Requesting microphone permission...");
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        } 
       });
-    } else {
+      console.log("✅ Microphone permission granted");
+      console.log("🎙️ Audio tracks:", stream.getAudioTracks().map(t => ({
+        label: t.label,
+        enabled: t.enabled,
+        muted: t.muted,
+        readyState: t.readyState
+      })));
+      
+      setMicStream(stream);
+      
+      // Format questions for the agent
       let formattedQuestions = "";
       if (questions) {
         formattedQuestions = questions
           .map((question) => `- ${question}`)
           .join("\n");
+        console.log("📝 Formatted questions:", formattedQuestions);
       }
 
-      await vapi.start(interviewer, {
-        variableValues: {
-          questions: formattedQuestions,
-        },
+      const agentId = process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID;
+      console.log("🤖 Agent ID:", agentId);
+
+      if (!agentId) {
+        throw new Error("NEXT_PUBLIC_ELEVENLABS_AGENT_ID is not configured");
+      }
+
+      // Start the conversation with the agent
+      console.log("🚀 Starting ElevenLabs session...");
+      await startSession({
+        agentId: agentId,
+        connectionType: "websocket",
       });
+      
+      console.log("✅ Session started successfully");
+      console.log("🎧 Listening for user input...");
+      
+    } catch (error) {
+      console.error("❌ Failed to start conversation:", error);
+      setCallStatus(CallStatus.INACTIVE);
+      setIsConnecting(false);
+      
+      // Clean up stream on error
+      if (micStream) {
+        micStream.getTracks().forEach(track => track.stop());
+        setMicStream(null);
+      }
+      
+      // Show user-friendly error message
+      alert(`Failed to start call: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
-  const handleDisconnect = () => {
+  const handleDisconnect = async () => {
+    await endSession();
     setCallStatus(CallStatus.FINISHED);
-    vapi.stop();
   };
 
   return (
@@ -151,13 +192,9 @@ const Agent = ({
         {/* AI Interviewer Card */}
         <div className="card-interviewer">
           <div className="avatar">
-            <Image
-              src="/ai-avatar.png"
-              alt="profile-image"
-              width={65}
-              height={54}
-              className="object-cover"
-            />
+            <div className="size-16 rounded-full bg-primary/20 flex items-center justify-center">
+              <span className="text-3xl">🤖</span>
+            </div>
             {isSpeaking && <span className="animate-speak" />}
           </div>
           <h3>AI Interviewer</h3>
@@ -166,13 +203,9 @@ const Agent = ({
         {/* User Profile Card */}
         <div className="card-border">
           <div className="card-content">
-            <Image
-              src="/user-avatar.png"
-              alt="profile-image"
-              width={539}
-              height={539}
-              className="rounded-full object-cover size-[120px]"
-            />
+            <div className="size-[120px] rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center border-2 border-primary/30">
+              <span className="text-6xl">👤</span>
+            </div>
             <h3>{userName}</h3>
           </div>
         </div>

@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 import { Button } from "./ui/button";
-import DisplayTechIcons from "./DisplayTechIcons";
+import DisplayTopicIcons from "./DisplayTopicIcons";
 
 import { cn, getRandomInterviewCover } from "@/lib/utils";
 import { getFeedbackByInterviewId } from "@/lib/actions/general.action";
@@ -13,15 +13,15 @@ const InterviewCard = async ({
   userId,
   role,
   type,
-  techstack,
+  focusAreas,
   createdAt,
 }: InterviewCardProps) => {
   const feedback =
     userId && interviewId
       ? await getFeedbackByInterviewId({
-          interviewId,
-          userId,
-        })
+        interviewId,
+        userId,
+      })
       : null;
 
   const normalizedType = /mix/gi.test(type) ? "Mixed" : type;
@@ -30,7 +30,9 @@ const InterviewCard = async ({
     {
       Behavioral: "bg-light-400",
       Mixed: "bg-light-600",
-      Technical: "bg-light-800",
+      "Technical Finance": "bg-light-800",
+      "Case Study": "bg-primary-200 text-dark-100",
+      Operations: "bg-success-100",
     }[normalizedType] || "bg-light-600";
 
   const formattedDate = dayjs(
@@ -89,7 +91,7 @@ const InterviewCard = async ({
         </div>
 
         <div className="flex flex-row justify-between">
-          <DisplayTechIcons techStack={techstack} />
+          <DisplayTopicIcons focusAreas={focusAreas} />
 
           <Button className="btn-primary">
             <Link

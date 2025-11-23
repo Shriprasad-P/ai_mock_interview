@@ -9,6 +9,8 @@ import {
 } from "@/lib/actions/general.action";
 import { Button } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/actions/auth.action";
+import LearningResources from "@/components/LearningResources";
+import { getResourcesByTopics } from "@/constants/learning-resources";
 
 const Feedback = async ({ params }: RouteParams) => {
   const { id } = await params;
@@ -21,6 +23,10 @@ const Feedback = async ({ params }: RouteParams) => {
     interviewId: id,
     userId: user?.id!,
   });
+
+  // Get learning resources based on interview focus areas
+  const focusAreas = interview.focusAreas || [];
+  const resources = getResourcesByTopics(focusAreas);
 
   return (
     <section className="section-feedback">
@@ -91,6 +97,9 @@ const Feedback = async ({ params }: RouteParams) => {
           ))}
         </ul>
       </div>
+
+      {/* Learning Resources Section */}
+      <LearningResources resources={resources} />
 
       <div className="buttons">
         <Button className="btn-secondary flex-1">

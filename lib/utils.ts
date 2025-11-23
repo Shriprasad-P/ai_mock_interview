@@ -8,40 +8,25 @@ export function cn(...inputs: ClassValue[]) {
 
 const techIconBaseURL = "https://cdn.jsdelivr.net/gh/devicons/devicon/icons";
 
-const normalizeTechName = (tech: string) => {
-  const key = tech.toLowerCase().replace(/\.js$/, "").replace(/\s+/g, "");
+const normalizeTopicName = (topic: string) => {
+  const key = topic.toLowerCase().replace(/\.js$/, "").replace(/\s+/g, "");
   return mappings[key as keyof typeof mappings];
 };
 
-const checkIconExists = async (url: string) => {
-  try {
-    const response = await fetch(url, { method: "HEAD" });
-    return response.ok; // Returns true if the icon exists
-  } catch {
-    return false;
-  }
-};
-
-export const getTechLogos = async (techArray: string[]) => {
-  const logoURLs = techArray.map((tech) => {
-    const normalized = normalizeTechName(tech);
+export const getTopicIcons = (topicArray: string[]) => {
+  return topicArray.map((topic) => {
+    const normalized = normalizeTopicName(topic);
     return {
-      tech,
-      url: `${techIconBaseURL}/${normalized}/${normalized}-original.svg`,
+      topic,
+      url: normalized ? `${techIconBaseURL}/${normalized}/${normalized}-original.svg` : "/tech.svg",
     };
   });
-
-  const results = await Promise.all(
-    logoURLs.map(async ({ tech, url }) => ({
-      tech,
-      url: (await checkIconExists(url)) ? url : "/tech.svg",
-    }))
-  );
-
-  return results;
 };
 
 export const getRandomInterviewCover = () => {
   const randomIndex = Math.floor(Math.random() * interviewCovers.length);
-  return `/covers${interviewCovers[randomIndex]}`;
+  // interviewCovers in constants already includes /covers/ prefix if I updated it that way
+  // Let's check constants again. I updated it to include /covers/ prefix.
+  // So here I should just return the string.
+  return interviewCovers[randomIndex];
 };

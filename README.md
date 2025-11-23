@@ -12,7 +12,7 @@
     <img src="https://img.shields.io/badge/-Firebase-black?style=for-the-badge&logoColor=white&logo=firebase&color=DD2C00" alt="firebase" />
   </div>
 
-  <h3 align="center">Prepwise: A job interview preparation platform powered by Vapi AI Voice agents</h3>
+  <h3 align="center">InterviewGenie: A job interview preparation platform powered by ElevenLabs AI Voice agents</h3>
 
    <div align="center">
      Build this project step by step with our detailed tutorial on <a href="https://www.youtube.com/@javascriptmastery/videos" target="_blank"><b>JavaScript Mastery</b></a> YouTube. Join the JSM family!
@@ -39,7 +39,7 @@ If you prefer visual learning, this is the perfect resource for you. Follow our 
 
 ## <a name="introduction">🤖 Introduction</a>
 
-Built with Next.js for the user interface and backend logic, Firebase for authentication and data storage, styled with TailwindCSS and using Vapi's voice agents, Prepwise is a website project designed to help you learn integrating AI models with your apps. The platform offers a sleek and modern experience for job interview preparation.
+Built with Next.js for the user interface and backend logic, Firebase for authentication and data storage, styled with TailwindCSS and using ElevenLabs voice agents, InterviewGenie is a website project designed to help you prepare for **MBA Finance & Operations interviews**. The platform offers a sleek and modern experience for job interview preparation, simulating real-world scenarios with AI voice agents.
 
 If you're getting started and need assistance or face any bugs, join our active Discord community with over **50k+** members. It's a place where people help each other out.
 
@@ -52,16 +52,16 @@ If you're getting started and need assistance or face any bugs, join our active 
 - Tailwind CSS
 - Vapi AI
 - shadcn/ui
-- Google Gemeni
+- Google Gemini
 - Zod
 
 ## <a name="features">🔋 Features</a>
 
 👉 **Authentication**: Sign Up and Sign In using password/email authentication handled by Firebase.
 
-👉 **Create Interviews**: Easily generate job interviews with help of Vapi voice assistants and Google Gemini.
+👉 **Create Interviews**: Easily generate MBA job interviews (Finance, Operations, Consulting, etc.) with help of Vapi voice assistants and Google Gemini.
 
-👉 **Get feedback from AI**: Take the interview with AI voice agent, and receive instant feedback based on your conversation.
+👉 **Get feedback from AI**: Take the interview with AI voice agent, and receive instant feedback on Business Acumen, Analytical Thinking, and Communication.
 
 👉 **Modern UI/UX**: A sleek and user-friendly interface designed for a great experience.
 
