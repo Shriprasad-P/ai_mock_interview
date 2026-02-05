@@ -35,7 +35,7 @@ If you prefer visual learning, this is the perfect resource for you. Follow the 
 
 ## <a name="introduction">🤖 Introduction</a>
 
-Built with Next.js for the user interface and backend logic, Firebase for authentication and data storage, styled with TailwindCSS and using ElevenLabs voice agents, InterviewGenie is a website project designed to help you prepare for **MBA Finance & Operations interviews**. The platform offers a sleek and modern experience for job interview preparation, simulating real-world scenarios with AI voice agents.
+Built with Next.js for the user interface and backend logic, Firebase for authentication and data storage, styled with TailwindCSS and using ElevenLabs voice agents, InterviewGenie is a website project designed to help you prepare for **any professional interview** - from **Tech (DSA, System Design)** to **MBA (Finance, Operations)** to **Engineering (ECE, Civil, Mechanical)** and more. The platform offers a sleek and modern experience for job interview preparation, simulating real-world scenarios with AI voice agents.
 
 If you're getting started and need assistance or face any bugs, join our active Discord community with over **50k+** members. It's a place where people help each other out.
 
@@ -55,13 +55,31 @@ If you're getting started and need assistance or face any bugs, join our active 
 
 👉 **Authentication**: Sign Up and Sign In using password/email authentication handled by Firebase.
 
-👉 **Create Interviews**: Easily generate MBA job interviews (Finance, Operations, Consulting, etc.) with help of ElevenLabs voice agents and Google Gemini.
+👉 **Quick Start Modules**: Jump straight into focused practice with pre-built modules:
+- 💻 Technical Coding (DSA, Algorithms)
+- 🏗️ System Design (Scalability, Databases)
+- 🧠 Aptitude & Reasoning
+- 🤝 Behavioral / HR
+- 🔌 Embedded Systems, VLSI, Architecture & more
 
-👉 **Get feedback from AI**: Take the interview with AI voice agent, and receive instant feedback on Business Acumen, Analytical Thinking, and Communication.
+👉 **Company-Specific Prep**: Practice interviews tailored for top companies:
+- Google, Amazon, Microsoft, Meta
+- TCS, Infosys, Wipro, Accenture
+
+👉 **Multi-Domain Support**: Prepare for any field:
+- Computer Science (DSA, System Design, Coding)
+- MBA (Finance, Operations, Consulting)
+- Engineering (ECE, Civil, Mechanical, Architecture)
+- Data Science, Healthcare & more
+
+👉 **Create Custom Interviews**: Generate personalized interviews with ElevenLabs voice agents and Google Gemini.
+
+👉 **Smart Feedback System**: Receive instant AI feedback with:
+- Color-coded performance scores (Green/Yellow/Red)
+- Visual indicators for strengths & weak areas
+- **Personalized learning resources** based on your weak areas
 
 👉 **Modern UI/UX**: A sleek and user-friendly interface designed for a great experience.
-
-👉 **Interview Page**: Conduct AI-driven interviews with real-time feedback and detailed transcripts.
 
 👉 **Dashboard**: Manage and track all your interviews with easy navigation.
 

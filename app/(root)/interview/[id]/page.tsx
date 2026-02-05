@@ -8,13 +8,13 @@ import {
   getFeedbackByInterviewId,
   getInterviewById,
 } from "@/lib/actions/general.action";
-import { getCurrentUser } from "@/lib/actions/auth.action";
+import { currentUser } from "@clerk/nextjs/server";
 import DisplayTopicIcons from "@/components/DisplayTopicIcons";
 
 const InterviewDetails = async ({ params }: RouteParams) => {
   const { id } = await params;
 
-  const user = await getCurrentUser();
+  const user = await currentUser();
 
   const interview = await getInterviewById(id);
   if (!interview) redirect("/");
@@ -48,7 +48,7 @@ const InterviewDetails = async ({ params }: RouteParams) => {
       </div>
 
       <Agent
-        userName={user?.name!}
+        userName={`${user?.firstName} ${user?.lastName}`}
         userId={user?.id}
         interviewId={id}
         type="interview"

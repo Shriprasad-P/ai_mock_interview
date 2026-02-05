@@ -332,3 +332,89 @@
     transform: translateY(0);
   }
 }
+
+/* Module Cards */
+@layer components {
+  .modules-grid {
+    @apply grid grid-cols-2 md:grid-cols-4 gap-4;
+  }
+
+  .module-card {
+    @apply flex flex-col items-center gap-3 p-6 rounded-2xl cursor-pointer transition-all duration-300;
+    @apply bg-gradient-to-b from-[#1A1C20] to-[#08090D];
+    @apply border border-[#4B4D4F33] hover:border-primary-200/50;
+    @apply hover:scale-105 hover:shadow-lg hover:shadow-primary-200/10;
+    min-height: 180px;
+  }
+
+  .module-icon {
+    @apply text-4xl mb-2;
+  }
+
+  .module-title {
+    @apply text-lg font-semibold text-white text-center;
+  }
+
+  .module-description {
+    @apply text-xs text-light-400 text-center line-clamp-2;
+  }
+
+  .module-footer {
+    @apply flex gap-3 mt-auto text-xs;
+  }
+
+  .module-level {
+    @apply px-2 py-1 bg-primary-200/20 text-primary-200 rounded-full;
+  }
+
+  .module-questions {
+    @apply px-2 py-1 bg-light-600/20 text-light-400 rounded-full;
+  }
+
+  /* Company Cards */
+  .company-card {
+    @apply flex flex-col items-center gap-3 p-6 rounded-2xl cursor-pointer transition-all duration-300;
+    @apply bg-gradient-to-b from-[#1A1C20] to-[#08090D];
+    @apply border border-[#4B4D4F33] hover:border-primary-200/50;
+    @apply hover:scale-105 hover:shadow-lg hover:shadow-primary-200/10;
+    min-height: 180px;
+  }
+
+  .company-logo-container {
+    @apply relative size-12 flex items-center justify-center;
+  }
+
+  .company-logo {
+    @apply object-contain;
+  }
+
+  .company-fallback {
+    @apply absolute inset-0 flex items-center justify-center text-2xl font-bold text-primary-200 bg-primary-200/20 rounded-full;
+  }
+
+  .company-name {
+    @apply text-lg font-semibold text-white text-center;
+  }
+
+  .company-description {
+    @apply text-xs text-light-400 text-center line-clamp-2;
+  }
+
+  .company-footer {
+    @apply flex gap-3 mt-auto text-xs;
+  }
+
+  .company-level {
+    @apply px-2 py-1 bg-success-100/20 text-success-100 rounded-full;
+  }
+
+  /* Module Header */
+  .module-header {
+    @apply flex items-center gap-4 mb-8 p-4 rounded-xl;
+    @apply bg-gradient-to-r from-primary-200/10 to-transparent;
+  }
+
+  .company-badge {
+    @apply size-12 flex items-center justify-center text-2xl font-bold text-primary-200 bg-primary-200/20 rounded-full;
+  }
+}

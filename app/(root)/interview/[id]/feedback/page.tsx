@@ -8,13 +8,27 @@ import {
   getInterviewById,
 } from "@/lib/actions/general.action";
 import { Button } from "@/components/ui/button";
-import { getCurrentUser } from "@/lib/actions/auth.action";
+import { currentUser } from "@clerk/nextjs/server";
 import LearningResources from "@/components/LearningResources";
 import { getResourcesByTopics } from "@/constants/learning-resources";
 
+// Map category names to resource topics
+const categoryToTopics: Record<string, string[]> = {
+  "Communication Skills": ["communication skills", "interview preparation", "behavioral"],
+  "Domain Knowledge": ["data structures", "algorithms", "system design"],
+  "Analytical Thinking": ["problem solving", "critical thinking", "algorithms"],
+  "Cultural & Role Fit": ["behavioral", "leadership", "interview preparation"],
+  "Confidence and Clarity": ["communication skills", "interview preparation"],
+  // Technical categories
+  "Technical Skills": ["data structures", "algorithms", "system design"],
+  "Problem Solving": ["algorithms", "problem solving", "data structures"],
+  "System Design": ["system design", "databases", "scalability"],
+  "Coding": ["data structures", "algorithms", "python", "java"],
+};
+
 const Feedback = async ({ params }: RouteParams) => {
   const { id } = await params;
-  const user = await getCurrentUser();
+  const user = await currentUser();
 
   const interview = await getInterviewById(id);
   if (!interview) redirect("/");
@@ -26,7 +40,24 @@ const Feedback = async ({ params }: RouteParams) => {
 
   // Get learning resources based on interview focus areas
   const focusAreas = interview.focusAreas || [];
-  const resources = getResourcesByTopics(focusAreas);
+  
+  // Identify weak areas (score < 70) and get targeted resources
+  const weakCategories = feedback?.categoryScores?.filter(cat => cat.score < 70) || [];
+  const strongCategories = feedback?.categoryScores?.filter(cat => cat.score >= 70) || [];
+  
+  // Build topics from weak categories
+  const weakTopics: string[] = [];
+  weakCategories.forEach(cat => {
+    const topics = categoryToTopics[cat.name] || [];
+    weakTopics.push(...topics);
+  });
+  
+  // Combine focus areas with weak topics for comprehensive resources
+  const allTopics = [...new Set([...focusAreas, ...weakTopics])];
+  const resources = getResourcesByTopics(allTopics);
+
+  // Separate resources for weak areas specifically
+  const weakAreaResources = getResourcesByTopics(weakTopics);
 
   return (
     <section className="section-feedback">
@@ -44,7 +75,10 @@ const Feedback = async ({ params }: RouteParams) => {
             <Image src="/star.svg" width={22} height={22} alt="star" />
             <p>
               Overall Impression:{" "}
-              <span className="text-primary-200 font-bold">
+              <span className={`font-bold ${
+                (feedback?.totalScore || 0) >= 70 ? "text-green-400" : 
+                (feedback?.totalScore || 0) >= 50 ? "text-yellow-400" : "text-red-400"
+              }`}>
                 {feedback?.totalScore}
               </span>
               /100
@@ -70,36 +104,78 @@ const Feedback = async ({ params }: RouteParams) => {
       {/* Interview Breakdown */}
       <div className="flex flex-col gap-4">
         <h2>Breakdown of the Interview:</h2>
-        {feedback?.categoryScores?.map((category, index) => (
-          <div key={index}>
-            <p className="font-bold">
-              {index + 1}. {category.name} ({category.score}/100)
-            </p>
-            <p>{category.comment}</p>
-          </div>
-        ))}
+        {feedback?.categoryScores?.map((category, index) => {
+          const isWeak = category.score < 70;
+          const isStrong = category.score >= 80;
+          
+          return (
+            <div key={index} className={`p-4 rounded-lg ${
+              isWeak ? "bg-red-500/10 border border-red-500/30" : 
+              isStrong ? "bg-green-500/10 border border-green-500/30" : 
+              "bg-dark-400/50"
+            }`}>
+              <p className="font-bold flex items-center gap-2">
+                {isWeak && <span className="text-red-400">⚠️</span>}
+                {isStrong && <span className="text-green-400">✅</span>}
+                {index + 1}. {category.name} 
+                <span className={`ml-2 px-2 py-0.5 rounded text-sm ${
+                  isWeak ? "bg-red-500/20 text-red-400" : 
+                  isStrong ? "bg-green-500/20 text-green-400" : 
+                  "bg-yellow-500/20 text-yellow-400"
+                }`}>
+                  {category.score}/100
+                </span>
+              </p>
+              <p className="mt-2 text-light-400">{category.comment}</p>
+            </div>
+          );
+        })}
       </div>
 
       <div className="flex flex-col gap-3">
-        <h3>Strengths</h3>
-        <ul>
+        <h3 className="flex items-center gap-2">
+          <span className="text-green-400">✅</span> Strengths
+        </h3>
+        <ul className="list-disc list-inside space-y-1">
           {feedback?.strengths?.map((strength, index) => (
-            <li key={index}>{strength}</li>
+            <li key={index} className="text-green-300">{strength}</li>
           ))}
         </ul>
       </div>
 
       <div className="flex flex-col gap-3">
-        <h3>Areas for Improvement</h3>
-        <ul>
+        <h3 className="flex items-center gap-2">
+          <span className="text-red-400">⚠️</span> Areas for Improvement
+        </h3>
+        <ul className="list-disc list-inside space-y-1">
           {feedback?.areasForImprovement?.map((area, index) => (
-            <li key={index}>{area}</li>
+            <li key={index} className="text-red-300">{area}</li>
           ))}
         </ul>
       </div>
 
-      {/* Learning Resources Section */}
-      <LearningResources resources={resources} />
+      {/* Personalized Resources for Weak Areas */}
+      {weakAreaResources.length > 0 && (
+        <div className="mt-8 p-6 rounded-xl bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/30">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-3xl">🎯</span>
+            <div>
+              <h2 className="text-xl font-semibold text-white">
+                Focus on These Areas
+              </h2>
+              <p className="text-sm text-light-400">
+                Personalized resources based on your weak areas: {weakCategories.map(c => c.name).join(", ")}
+              </p>
+            </div>
+          </div>
+          <LearningResources resources={weakAreaResources} />
+        </div>
+      )}
+
+      {/* General Learning Resources */}
+      <div className="mt-4">
+        <LearningResources resources={resources} />
+      </div>
 
       <div className="buttons">
         <Button className="btn-secondary flex-1">
@@ -126,3 +202,4 @@ const Feedback = async ({ params }: RouteParams) => {
 };
 
 export default Feedback;
+

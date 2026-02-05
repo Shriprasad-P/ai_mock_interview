@@ -461,16 +461,167 @@ export const learningResources: Record<string, LearningResource[]> = {
     }
   ],
 
-  // General MBA Resources
+  // Architecture Resources
+  "architectural design": [
+    {
+      title: "ArchDaily - Architecture Tutorials",
+      type: "article",
+      url: "https://www.archdaily.com/search/articles",
+      description: "Leading architecture publication with tutorials and case studies",
+      difficulty: "intermediate",
+      estimatedTime: "5 hours",
+      topics: ["architectural design", "urban planning"]
+    },
+    {
+      title: "AutoCAD for Beginners",
+      type: "course",
+      url: "https://www.autodesk.com/certification/learn/catalog/product/autocad",
+      description: "Official AutoCAD training from Autodesk",
+      difficulty: "beginner",
+      estimatedTime: "20 hours",
+      topics: ["autocad", "cad design"]
+    }
+  ],
+
+  autocad: [
+    {
+      title: "AutoCAD Complete Tutorial",
+      type: "video",
+      url: "https://www.youtube.com/watch?v=VtLXKU1PpRU",
+      description: "Comprehensive AutoCAD tutorial for architects and engineers",
+      difficulty: "beginner",
+      estimatedTime: "10 hours",
+      topics: ["autocad", "cad design"]
+    }
+  ],
+
+  revit: [
+    {
+      title: "Revit Architecture Fundamentals",
+      type: "course",
+      url: "https://www.linkedin.com/learning/revit-2024-essential-training-for-architecture",
+      description: "LinkedIn Learning course on Revit for architecture",
+      difficulty: "beginner",
+      estimatedTime: "15 hours",
+      topics: ["revit", "bim", "architectural design"]
+    }
+  ],
+
+  // ECE Resources
+  "embedded systems": [
+    {
+      title: "Embedded Systems - Shape The World",
+      type: "course",
+      url: "https://www.edx.org/learn/embedded-systems/the-university-of-texas-at-austin-embedded-systems-shape-the-world-microcontroller-input-output",
+      description: "UT Austin's comprehensive embedded systems course",
+      difficulty: "intermediate",
+      estimatedTime: "25 hours",
+      topics: ["embedded systems", "microcontrollers"]
+    },
+    {
+      title: "Arduino Getting Started",
+      type: "article",
+      url: "https://www.arduino.cc/en/Guide",
+      description: "Official Arduino getting started guide",
+      difficulty: "beginner",
+      estimatedTime: "5 hours",
+      topics: ["arduino", "microcontrollers", "embedded systems"]
+    }
+  ],
+
+  vlsi: [
+    {
+      title: "VLSI Design - NPTEL",
+      type: "course",
+      url: "https://nptel.ac.in/courses/117/106/117106092/",
+      description: "IIT's VLSI design course covering fundamentals",
+      difficulty: "advanced",
+      estimatedTime: "40 hours",
+      topics: ["vlsi", "digital circuits"]
+    }
+  ],
+
+  "circuit design": [
+    {
+      title: "Circuit Analysis - Khan Academy",
+      type: "video",
+      url: "https://www.khanacademy.org/science/electrical-engineering/ee-circuit-analysis-topic",
+      description: "Free circuit analysis course with interactive exercises",
+      difficulty: "beginner",
+      estimatedTime: "15 hours",
+      topics: ["circuit design", "analog circuits", "digital circuits"]
+    }
+  ],
+
+  // Mechanical Engineering Resources
+  solidworks: [
+    {
+      title: "SolidWorks Tutorial for Beginners",
+      type: "video",
+      url: "https://www.youtube.com/watch?v=qtgmGkEyPqs",
+      description: "Complete SolidWorks tutorial for mechanical engineers",
+      difficulty: "beginner",
+      estimatedTime: "8 hours",
+      topics: ["solidworks", "cad design", "mechanical design"]
+    }
+  ],
+
+  thermodynamics: [
+    {
+      title: "Engineering Thermodynamics - MIT OCW",
+      type: "course",
+      url: "https://ocw.mit.edu/courses/2-006-thermal-fluids-engineering-i-spring-2008/",
+      description: "MIT's open courseware on thermodynamics",
+      difficulty: "intermediate",
+      estimatedTime: "30 hours",
+      topics: ["thermodynamics", "heat transfer"]
+    }
+  ],
+
+  // Civil Engineering Resources
+  "structural analysis": [
+    {
+      title: "Structural Analysis - NPTEL",
+      type: "course",
+      url: "https://nptel.ac.in/courses/105/105/105105109/",
+      description: "IIT's structural analysis course",
+      difficulty: "intermediate",
+      estimatedTime: "35 hours",
+      topics: ["structural analysis", "structural design"]
+    }
+  ],
+
+  "construction management": [
+    {
+      title: "Construction Project Management",
+      type: "course",
+      url: "https://www.coursera.org/learn/construction-project-management",
+      description: "Columbia's construction project management course",
+      difficulty: "intermediate",
+      estimatedTime: "20 hours",
+      topics: ["construction management", "project management"]
+    }
+  ],
+
+  // General Interview Resources (domain-agnostic)
   general: [
     {
-      title: "MBA Interview Preparation Guide",
+      title: "Interview Preparation Guide",
       type: "article",
-      url: "https://poetsandquants.com/2019/09/16/the-complete-guide-to-mba-interviews/",
-      description: "Comprehensive guide to MBA recruiting",
+      url: "https://www.indeed.com/career-advice/interviewing/how-to-prepare-for-an-interview",
+      description: "Comprehensive guide to interview preparation for any field",
       difficulty: "beginner",
       estimatedTime: "2 hours",
-      topics: ["mba", "interview preparation"]
+      topics: ["interview preparation", "communication skills"]
+    },
+    {
+      title: "STAR Method Interview Guide",
+      type: "article",
+      url: "https://www.themuse.com/advice/star-interview-method",
+      description: "How to structure behavioral interview responses",
+      difficulty: "beginner",
+      estimatedTime: "30 minutes",
+      topics: ["behavioral", "star method", "interview preparation"]
     }
   ]
 };

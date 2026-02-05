@@ -23,19 +23,19 @@ export async function createFeedback(params: CreateFeedbackParams) {
       }),
       schema: feedbackSchema,
       prompt: `
-        You are an AI interviewer analyzing a mock MBA interview. Your task is to evaluate the candidate based on structured categories. Be thorough and detailed in your analysis. Don't be lenient with the candidate. If there are mistakes or areas for improvement, point them out.
+        You are an AI interviewer analyzing a mock interview. Your task is to evaluate the candidate based on structured categories. Be thorough and detailed in your analysis. Don't be lenient with the candidate. If there are mistakes or areas for improvement, point them out.
         Transcript:
         ${formattedTranscript}
 
         Please score the candidate from 0 to 100 in the following areas. Do not add categories other than the ones provided:
         - **Communication Skills**: Clarity, articulation, structured responses.
-        - **Business Acumen**: Understanding of business concepts, frameworks, and industry knowledge.
+        - **Domain Knowledge**: Understanding of relevant concepts, frameworks, and industry knowledge.
         - **Analytical Thinking**: Ability to structure problems, analyze data, and draw insights.
-        - **Cultural Fit**: Alignment with finance/consulting culture and values.
+        - **Cultural & Role Fit**: Alignment with industry values and job role expectations.
         - **Confidence and Clarity**: Professional demeanor and articulation.
         `,
       system:
-        "You are a professional MBA interviewer analyzing a mock interview. Your task is to evaluate the candidate based on structured categories",
+        "You are a professional interviewer analyzing a mock interview. Your task is to evaluate the candidate based on structured categories",
     });
 
     const feedback = {
