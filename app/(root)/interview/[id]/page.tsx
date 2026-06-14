@@ -24,6 +24,10 @@ const InterviewDetails = async ({ params }: RouteParams) => {
     userId: user?.id!,
   });
 
+  const agentPrompt = `You are a professional interviewer evaluating a candidate for a ${interview.role} position. The candidate has a ${interview.level} experience level. Focus on exactly ${interview.questions?.length || 0} questions related to: ${interview.focusAreas.join(", ")}.
+
+The questions you must ask are provided in the dynamic variables. Ask these questions one by one. After asking a question, wait for the candidate's response before moving to the next. Do NOT provide the answer. Allow the candidate to think and speak. Keep the interview natural but strictly adhere to the provided questions.`;
+
   return (
     <>
       <div className="flex flex-row gap-4 justify-between">
@@ -54,6 +58,7 @@ const InterviewDetails = async ({ params }: RouteParams) => {
         type="interview"
         questions={interview.questions}
         feedbackId={feedback?.id}
+        agentPrompt={agentPrompt}
       />
     </>
   );

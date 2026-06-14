@@ -1,6 +1,6 @@
 
 import { db } from "./firebase/admin";
-import { getLatestInterviews, getInterviewsByUserId, getFeedbackByInterviewId, getInterviewsByUserId } from "./lib/actions/general.action";
+import { getLatestInterviews, getInterviewsByUserId, getFeedbackByInterviewId } from "./lib/actions/general.action";
 
 async function test() {
   console.log("Testing Firebase Admin...");

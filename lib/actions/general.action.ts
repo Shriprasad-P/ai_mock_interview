@@ -6,18 +6,71 @@ import { google } from "@ai-sdk/google";
 import { db } from "@/firebase/admin";
 import { feedbackSchema } from "@/constants";
 
-export async function createFeedback(params: CreateFeedbackParams) {
-  const { interviewId, userId, transcript, feedbackId } = params;
+const buildFallbackFeedback = (transcript: CreateFeedbackParams["transcript"]) => {
+  const userMessages = transcript.filter((message) => message.role === "user");
+  const assistantMessages = transcript.filter((message) => message.role === "assistant");
+  const hasTranscript = transcript.length > 0;
+  const hasUserAnswers = userMessages.some((message) => message.content.trim().length > 20);
 
+  return {
+    totalScore: hasUserAnswers ? 62 : 40,
+    categoryScores: [
+      {
+        name: "Communication Skills",
+        score: hasUserAnswers ? 65 : 40,
+        comment: hasUserAnswers
+          ? "You completed the interview and provided answers, but some responses need clearer structure and stronger examples."
+          : "The transcript did not include enough candidate responses to evaluate communication accurately.",
+      },
+      {
+        name: "Domain Knowledge",
+        score: hasUserAnswers ? 60 : 40,
+        comment: hasUserAnswers
+          ? "Your answers show partial familiarity with the topic. Add more specific concepts, trade-offs, and examples."
+          : "There was not enough answer content to judge domain knowledge.",
+      },
+      {
+        name: "Analytical Thinking",
+        score: hasUserAnswers ? 62 : 40,
+        comment: hasUserAnswers
+          ? "You should make your reasoning more explicit by stating assumptions, approach, and conclusion."
+          : "The available transcript is too limited to assess problem-solving depth.",
+      },
+      {
+        name: "Cultural & Role Fit",
+        score: hasUserAnswers ? 64 : 45,
+        comment: hasUserAnswers
+          ? "Your responses indicate engagement, but they would be stronger with role-specific impact and collaboration examples."
+          : "More complete answers are needed to assess role fit.",
+      },
+      {
+        name: "Confidence and Clarity",
+        score: hasUserAnswers ? 60 : 40,
+        comment: hasUserAnswers
+          ? "Improve confidence by answering in a concise STAR-style or problem-solution-result structure."
+          : "The interview ended without enough usable response content.",
+      },
+    ],
+    strengths: hasTranscript
+      ? [
+          "Completed the mock interview flow.",
+          "Captured a transcript that can be reviewed for improvement.",
+        ]
+      : ["Started the interview attempt."],
+    areasForImprovement: [
+      "Use a clear structure for each answer: context, action, result, and lesson.",
+      "Add more concrete technical or role-specific details.",
+      "Keep answers concise while explaining your reasoning out loud.",
+    ],
+    finalAssessment: assistantMessages.length
+      ? "Feedback was generated with a local fallback because the AI feedback service was unavailable or too slow. Use this as a baseline review and retake the interview for a richer AI assessment."
+      : "The interview transcript was too short for detailed scoring. Retake the interview and answer each question fully for better feedback.",
+  };
+};
+
+const generateFeedbackObject = async (formattedTranscript: string, transcript: CreateFeedbackParams["transcript"]) => {
   try {
-    const formattedTranscript = transcript
-      .map(
-        (sentence: { role: string; content: string }) =>
-          `- ${sentence.role}: ${sentence.content}\n`
-      )
-      .join("");
-
-    const { object } = await generateObject({
+    const feedbackPromise = generateObject({
       model: google("gemini-2.0-flash-001", {
         structuredOutputs: false,
       }),
@@ -37,6 +90,35 @@ export async function createFeedback(params: CreateFeedbackParams) {
       system:
         "You are a professional interviewer analyzing a mock interview. Your task is to evaluate the candidate based on structured categories",
     });
+
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error("AI feedback generation timed out")), 25000);
+    });
+
+    const { object } = await Promise.race([feedbackPromise, timeoutPromise]);
+    return object;
+  } catch (error) {
+    console.error("AI feedback generation failed, using fallback feedback:", error);
+    return buildFallbackFeedback(transcript);
+  }
+};
+
+export async function createFeedback(params: CreateFeedbackParams) {
+  const { interviewId, userId, transcript, feedbackId } = params;
+
+  try {
+    if (!interviewId || !userId) {
+      return { success: false, error: "Missing interview or user information." };
+    }
+
+    const formattedTranscript = transcript
+      .map(
+        (sentence: { role: string; content: string }) =>
+          `- ${sentence.role}: ${sentence.content}\n`
+      )
+      .join("");
+
+    const object = await generateFeedbackObject(formattedTranscript, transcript);
 
     const feedback = {
       interviewId: interviewId,
@@ -62,7 +144,12 @@ export async function createFeedback(params: CreateFeedbackParams) {
     return { success: true, feedbackId: feedbackRef.id };
   } catch (error) {
     console.error("Error saving feedback:", error);
-    return { success: false };
+    if (error instanceof Error) {
+      console.error(error.message);
+      console.error(error.stack);
+      return { success: false, error: error.message };
+    }
+    return { success: false, error: String(error) };
   }
 }
 
@@ -127,4 +214,22 @@ export async function getInterviewsByUserId(
     id: doc.id,
     ...doc.data(),
   })) as Interview[];
+}
+
+export async function getLatestInterviewByUserId(
+  userId: string
+): Promise<Interview | null> {
+  if (!userId) return null;
+
+  const interviews = await db
+    .collection("interviews")
+    .where("userId", "==", userId)
+    .orderBy("createdAt", "desc")
+    .limit(1)
+    .get();
+
+  if (interviews.empty) return null;
+
+  const doc = interviews.docs[0];
+  return { id: doc.id, ...doc.data() } as Interview;
 }

@@ -7,6 +7,7 @@ import Agent from "@/components/Agent";
 import { getInterviewTypeById } from "@/constants/interview-modules";
 import { db } from "@/firebase/admin";
 import { getRandomInterviewCover } from "@/lib/utils";
+import { getInterviewContext } from "@/lib/context7";
 
 interface ModulePageProps {
   params: Promise<{ moduleId: string }>;
@@ -18,43 +19,60 @@ const ModulePage = async ({ params }: ModulePageProps) => {
 
   if (!user) redirect("/sign-in");
 
-  const module = getInterviewTypeById(moduleId);
-  if (!module) redirect("/");
+  const interviewModule = getInterviewTypeById(moduleId);
+  if (!interviewModule) redirect("/");
 
-  // Generate questions for this module
-  const { text: questionsText } = await generateText({
-    model: google("gemini-2.0-flash-001"),
-    prompt: `Prepare ${module.questionCount} questions for a ${module.name} interview.
-      The focus areas are: ${module.focusAreas.join(", ")}.
-      The experience level is: ${module.level}.
+  // Fetch up-to-date library docs from Context7 for technical interviews
+  const context7Docs = await getInterviewContext(interviewModule.focusAreas, interviewModule.name);
+
+  let questions: string[] = [];
+
+  try {
+    // Generate questions for this module
+    const { text: questionsText } = await generateText({
+      model: google("gemini-2.0-flash-001"),
+      prompt: `Prepare ${interviewModule.questionCount} questions for a ${interviewModule.name} interview.
+      The focus areas are: ${interviewModule.focusAreas.join(", ")}.
+      The experience level is: ${interviewModule.level}.
+      ${context7Docs}
       
       Please return only the questions, without any additional text.
       The questions will be read by a voice assistant so avoid special characters.
+      ${context7Docs ? "If Context7 documentation is provided above, reference current API patterns and best practices in your questions." : ""}
       
       Return the questions formatted like this:
       ["Question 1", "Question 2", "Question 3"]
     `,
-  });
+    });
 
-  let questions: string[] = [];
-  try {
-    questions = JSON.parse(questionsText);
-  } catch {
-    questions = ["Tell me about your experience with " + module.focusAreas[0]];
+    try {
+      questions = JSON.parse(questionsText);
+    } catch {
+      console.error("Failed to parse AI response as JSON");
+      questions = [`Tell me about your experience with ${interviewModule.focusAreas[0]}`];
+    }
+  } catch (error) {
+    console.warn("AI generation failed (likely quota limit), using fallback questions:", error);
+    // Fallback questions if AI fails
+    questions = [
+      `Could you explain the core concepts of ${interviewModule.name}?`,
+	      `Tell me about a challenging project involving ${interviewModule.focusAreas[0]}.`,
+      `How do you handle error handling in ${interviewModule.name}?`
+    ];
   }
 
   // Create interview in database
   const interview = {
-    role: module.name,
-    type: module.name,
-    level: module.level,
-    focusAreas: module.focusAreas,
+    role: interviewModule.name,
+    type: interviewModule.name,
+    level: interviewModule.level,
+    focusAreas: interviewModule.focusAreas,
     questions: questions,
     userId: user.id,
     finalized: true,
-    coverImage: getRandomInterviewCover(),
+    coverImage: getRandomInterviewCover(interviewModule.id),
     createdAt: new Date().toISOString(),
-    moduleId: module.id,
+    moduleId: interviewModule.id,
   };
 
   const docRef = await db.collection("interviews").add(interview);
@@ -62,10 +80,10 @@ const ModulePage = async ({ params }: ModulePageProps) => {
   return (
     <>
       <div className="module-header">
-        <span className="text-4xl">{module.icon}</span>
+        <span className="text-4xl">{interviewModule.icon}</span>
         <div>
-          <h3>{module.name} Interview</h3>
-          <p className="text-light-400">{module.description}</p>
+          <h3>{interviewModule.name} Interview</h3>
+          <p className="text-light-400">{interviewModule.description}</p>
         </div>
       </div>
 
@@ -75,6 +93,8 @@ const ModulePage = async ({ params }: ModulePageProps) => {
         interviewId={docRef.id}
         type="interview"
         questions={questions}
+        interviewModule={interviewModule.name}
+        interviewFocusAreas={interviewModule.focusAreas}
       />
     </>
   );

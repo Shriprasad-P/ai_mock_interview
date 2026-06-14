@@ -23,7 +23,8 @@ export const getTopicIcons = (topicArray: string[]) => {
   });
 };
 
-export const getRandomInterviewCover = () => {
+export const getRandomInterviewCover = (seed?: string) => {
+  void seed;
   const randomIndex = Math.floor(Math.random() * interviewCovers.length);
   // interviewCovers in constants already includes /covers/ prefix if I updated it that way
   // Let's check constants again. I updated it to include /covers/ prefix.

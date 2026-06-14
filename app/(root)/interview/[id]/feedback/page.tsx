@@ -10,7 +10,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { currentUser } from "@clerk/nextjs/server";
 import LearningResources from "@/components/LearningResources";
+import DownloadFeedbackPDF from "@/components/DownloadFeedbackPDF";
 import { getResourcesByTopics } from "@/constants/learning-resources";
+
 
 // Map category names to resource topics
 const categoryToTopics: Record<string, string[]> = {
@@ -102,7 +104,7 @@ const Feedback = async ({ params }: RouteParams) => {
       <p>{feedback?.finalAssessment}</p>
 
       {/* Interview Breakdown */}
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 mt-8">
         <h2>Breakdown of the Interview:</h2>
         {feedback?.categoryScores?.map((category, index) => {
           const isWeak = category.score < 70;
@@ -185,6 +187,24 @@ const Feedback = async ({ params }: RouteParams) => {
             </p>
           </Link>
         </Button>
+
+        {feedback && (
+          <DownloadFeedbackPDF
+            feedback={{
+              totalScore: feedback.totalScore,
+              categoryScores: feedback.categoryScores,
+              strengths: feedback.strengths,
+              areasForImprovement: feedback.areasForImprovement,
+              finalAssessment: feedback.finalAssessment,
+              createdAt: feedback.createdAt,
+            }}
+            interview={{
+              role: interview.role,
+              type: interview.type,
+              level: interview.level,
+            }}
+          />
+        )}
 
         <Button className="btn-primary flex-1">
           <Link
